@@ -4,4 +4,8 @@ Tester.testNumEdges();
 Tester.testNumVertices();
 Tester.testOutNeighbors();
 Tester.testReport();
+
+Tester.testNumWords();
+Tester.testSynonyms();
+Tester.testQuery();
 ' | sml

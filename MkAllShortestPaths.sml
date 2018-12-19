@@ -47,46 +47,45 @@ struct
          | SOME a => Set.toSeq a 
   (* Task 2.4 *)
 
+  (*
+  * union function is to union two seq table if they have a same
+  * key then append their value(seq)
+  * *)
+  fun union(M,N)=
+    Table.merge (fn(a,b) => Seq.append(a,b)) (M,N)
     
+  fun ngf (F,G) = 
+     let
+         (*return a table the key is u's outneighbors and the value is
+         * singleton(u)  --->seq table
+         * *)
+         fun addParent u = 
+            Table.tabulate (fn _ => Seq.singleton(u)) (Set.fromSeq(outNeighbors G u))
+         (*
+         * added is a table , key is every element is set F 
+         * and the value is a table
+         * *)
+         val  added = Table.tabulate addParent F
+     in
+         (*
+         * return a unioned table
+         * union(table,table) -->the value of f(f belonging F)
+         * union aims to merge two table even they may have the same
+         * key
+         * *)
+         Table.reduce union (Table.empty()) added
+     end
   fun makeASP (G : graph) (v : vertex) : asp =     
       case Table.find G v
         of NONE => (v,Table.empty())
          | SOME _ =>
              let
-               (*
-               * union function is to union two seq table if they have a same
-               * key then append their value(seq)
-               * *)
-               fun union(M,N)=
-                   Table.merge (fn(a,b) => Seq.append(a,b)) (M,N)
-               fun ngf (F) = 
-                 let
-                   (*return a table the key is u's outneighbors and the value is
-                   * singleton(u)  --->seq table
-                   * *)
-                   fun addParent u = 
-                      Table.tabulate (fn _ => Seq.singleton(u))
-                      (Set.fromSeq(outNeighbors G u))
-                   (*
-                   * added is a table , key is every element is set F 
-                   * and the value is a table
-                   * *)
-                   val  added = Table.tabulate addParent F
-                 in
-                   (*
-                   * return a unioned table
-                   * union(table,table) -->the value of f(f belonging F)
-                   * union aims to merge two table even they may have the same
-                   * key
-                   * *)
-                   Table.reduce union (Table.empty()) added
-                 end
                fun BFSReach (X,F) =
                  if Table.size F=0 then X
                  else 
                     let 
                       val X'= union(X,F)
-                      val NGF = ngf(Table.domain(F))
+                      val NGF = ngf(Table.domain(F),G)
                       val F' = Table.erase(NGF,Table.domain X')
                     in
                       BFSReach (X',F')
